@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information</title>
+ 
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">       
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+ 
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+ 
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+ 
+        .card-header {
+            background: linear-gradient(135deg, #4968ce, #6c8ef0);
+            border-radius: 12px 12px 0 0 !important;
+        }
+ 
+        .modal-backdrop-custom {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 999;
+        }
+ 
+        .form-addnew {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+            z-index: 1000;
+            width: 420px;
+            max-width: 95vw;
+        }
+ 
+        #studentTable thead th {
+            background-color: #4968ce;
+            color: #fff;
+            white-space: nowrap;
+        }
+ 
+        #studentTable tbody tr:hover {
+            background-color: #eef1fb;
+        }
+ 
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+ 
+    <div class="container-md py-5">
+        <div class="card">
+ 
+            <!-- Header -->
+            <div class="card-header py-3 text-center">
+                <h4 class="text-white fw-bold mb-0">
+                    <i class="bi bi-mortarboard-fill me-2"></i>Student Information
+                </h4>
+            </div>
+ 
+            <div class="card-body p-4">
+ 
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-2 mb-3">
+                    <button id="addNew" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add New
+                    </button>
+                    <button id="edit" class="btn btn-success">
+                        <i class="bi bi-pencil-square me-1"></i>Edit
+                    </button>
+                    <button id="remove" class="btn btn-danger">
+                        <i class="bi bi-trash3 me-1"></i>Remove
+                    </button>
+                </div>
+ 
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table id="studentTable" class="table table-bordered table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="select" class="form-check-input"
+                                           onclick="toggleSelectAll(this)">
+                                </th>
+                                <th>Student ID</th>
+                                <th>Student Name</th>
+                                <th>Sex</th>
+                                <th>Phone Number</th>
+                                <th>DOB</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+ 
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Backdrop -->
+    <div class="modal-backdrop-custom" id="formBackdrop"></div>
+ 
+    <!-- Add / Edit Form -->
+    <div class="form-addnew" id="studentFormPanel">
+        <h5 id="formTitle" class="fw-bold mb-4 text-primary">Add New Student</h5>
+ 
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Student Name</label>
+            <input type="text" id="studentNameInput" class="form-control" placeholder="Enter full name" required>
+        </div>
+ 
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Sex</label>
+            <select id="sexInput" class="form-select" required>
+                <option value="">-- Select --</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+ 
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Phone Number</label>
+            <input type="number" id="phoneInput" class="form-control" placeholder="e.g. 0123456789" required>
+        </div>
+ 
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Date of Birth</label>
+            <input type="date" id="dobInput" class="form-control" required>
+        </div>
+ 
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" id="emailInput" class="form-control" placeholder="example@gmail.com" required>
+        </div>
+ 
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" id="closeBtn" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>Close
+            </button>
+            <button type="button" id="createBtn" class="btn btn-success">
+                <i class="bi bi-check-circle me-1"></i>Create
+            </button>
+        </div>
+    </div>
+ 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+    <script>
+        function toggleSelectAll(source) {
+            $(".selectStudent").prop("checked", source.checked);
+        }
+ 
+        $(document).ready(function () {
+            let nextStudentId = 1;
+            let editRow = null;
+ 
+            function generateStudentId() {
+                return "ST" + String(nextStudentId++).padStart(3, "0");
+            }
+ 
+            function openForm() {
+                $(".form-addnew").show();
+                $("#formBackdrop").show();
+            }
+ 
+            function closeForm() {
+                $(".form-addnew").hide();
+                $("#formBackdrop").hide();
+                resetForm();
+            }
+ 
+            function resetForm() {
+                $("#studentNameInput").val("");
+                $("#sexInput").val("");
+                $("#phoneInput").val("");
+                $("#dobInput").val("");
+                $("#emailInput").val("");
+            }
+ 
+            // ==========================
+            // Open Add Form
+            // ==========================
+            $("#addNew").click(function () {
+                editRow = null;
+                resetForm();
+                $("#formTitle").text("Add New Student");
+                $("#createBtn").html('<i class="bi bi-check-circle me-1"></i>Create');
+                openForm();
+            });
+ 
+            // ==========================
+            // Close Form
+            // ==========================
+            $("#closeBtn, #formBackdrop").click(function () {
+                editRow = null;
+                closeForm();
+            });
+ 
+            // ==========================
+            // Create / Update
+            // ==========================
+            $("#createBtn").click(function () {
+                let studentName = $("#studentNameInput").val().trim();
+                let sex         = $("#sexInput").val().trim();
+                let phone       = $("#phoneInput").val().trim();
+                let dob         = $("#dobInput").val();
+                let email       = $("#emailInput").val().trim();
+ 
+                // website sweetAlert2 : show error alert
+                function showError(msg) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Validation Error",
+                        text: msg,
+                        confirmButtonColor: "#4968ce"
+                    });
+                }
+ 
+                if (!studentName) {
+                    showError("Please fill in the student name."); return;
+                }
+                if (!sex) {
+                    showError("Please select the sex."); return;
+                }
+                if(!phone) {
+                    showError("Please fill in the phone number."); return;
+                }
+                if(!dob) {
+                    showError("Please select the date of birth."); return;
+                }
+                if(!email) {
+                    showError("Please fill in the email address."); return;
+                }
+                if (!/^[A-Za-z]+ [A-Za-z]+$/.test(studentName)) {
+                    showError("Student name must contain only letters and one space."); return;
+                }
+                if (!/0\d{8,9}$/.test(phone)) {
+                    showError("Phone number must start with '0' and be 9 or 10 digits long."); return;
+                }
+                if (!/^\d+$/.test(phone)) {
+                    showError("Phone number must contain digits only."); return;
+                }
+                if(phone.length < 9 || phone.length > 10) {
+                    showError("Phone number must be between 9 and 10 digits."); return;
+                }
+
+                let checkedEmail = $("#studentTable tbody tr").find("td:eq(6)").filter(function() {
+                    return $(this).text().toLowerCase() === email.toLowerCase();
+                });
+
+                if(checkedEmail.length > 0) {
+                    showError("An student with this email already exists."); return;
+                }
+                if(email.length > 50) {
+                    showError("Email must not exceed 50 characters."); return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showError("Please enter a valid email address."); return;
+                }
+                if (!["icloud.com", "gmail.com", "yahoo.com", "outlook.com"].some(domain => email.endsWith("@" + domain))) {
+                    showError("Email must end with a valid domain (e.g., @gmail.com, @yahoo.com)."); return;
+                }
+                if (!["Male", "Female"].includes(sex)) {
+                    showError("Sex must be either 'Male' or 'Female'."); return;
+                }
+
+                const dobDate   = new Date(dob);
+                const today     = new Date();
+                today.setHours(0, 0, 0, 0);  
+
+                if (dobDate >= today) {
+                    showError("Date of Birth cannot be today or in the future."); return;
+                }
+ 
+                if (editRow == null) {
+                    let studentId = generateStudentId();
+                    $("#studentTable tbody").append(`
+                        <tr>
+                            <td><input type="checkbox" class="form-check-input selectStudent"></td>
+                            <td>${studentId}</td>
+                            <td>${studentName}</td>
+                            <td>${sex}</td>
+                            <td>${phone}</td>
+                            <td>${dob}</td>
+                            <td>${email}</td>
+                        </tr>
+                    `);
+                    closeForm();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Student Added",
+                        text: `${studentName} has been added successfully.`,
+                        confirmButtonColor: "#4968ce",
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    editRow.find("td:eq(2)").text(studentName);
+                    editRow.find("td:eq(3)").text(sex);
+                    editRow.find("td:eq(4)").text(phone);
+                    editRow.find("td:eq(5)").text(dob);
+                    editRow.find("td:eq(6)").text(email);
+                    editRow = null;
+                    closeForm();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Student Updated",
+                        text: `${studentName}'s information has been updated.`,
+                        confirmButtonColor: "#4968ce",
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }
+            });
+ 
+            // ==========================
+            // Edit
+            // ==========================
+            $("#edit").click(function () {
+                let checked = $(".selectStudent:checked");
+ 
+                if (checked.length === 0) {
+                    Swal.fire({ icon: "warning", title: "No Selection", text: "Please select a student to edit.", confirmButtonColor: "#4968ce" });
+                    return;
+                }
+                if (checked.length > 1) {
+                    Swal.fire({ icon: "warning", title: "Too Many Selected", text: "Please select only one student to edit.", confirmButtonColor: "#4968ce" });
+                    return;
+                }
+ 
+                editRow = checked.closest("tr");
+ 
+                $("#studentNameInput").val(editRow.find("td:eq(2)").text());
+                $("#sexInput").val(editRow.find("td:eq(3)").text());
+                $("#phoneInput").val(editRow.find("td:eq(4)").text());
+                $("#dobInput").val(editRow.find("td:eq(5)").text());
+                $("#emailInput").val(editRow.find("td:eq(6)").text());
+ 
+                $("#formTitle").text("Edit Student");
+                $("#createBtn").html('<i class="bi bi-check-circle me-1"></i>Update');
+                openForm();
+            });
+ 
+            // ==========================
+            // Delete
+            // ==========================
+            $("#remove").click(function () {
+                let checked = $(".selectStudent:checked");
+ 
+                if (checked.length === 0) {
+                    Swal.fire({ icon: "warning", title: "No Selection", text: "Please select student(s) to remove.", confirmButtonColor: "#4968ce" });
+                    return;
+                }
+ 
+                Swal.fire({
+                    icon: "warning",
+                    title: "Confirm Delete",
+                    text: `Are you sure you want to delete ${checked.length} selected student(s)?`,
+                    showCancelButton: true,
+                    confirmButtonColor: "#e3342f",
+                    cancelButtonColor: "#6c757d",
+                    confirmButtonText: "Yes, delete",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        checked.closest("tr").remove();
+                        $("#select").prop("checked", false);
+                        Swal.fire({
+                            icon: "success",
+                            title: "Deleted",
+                            text: "Selected student(s) have been removed.",
+                            confirmButtonColor: "#4968ce",
+                            timer: 1800,
+                            timerProgressBar: true
+                        });
+                    }
+                });
+            });
+ 
+            // ==========================
+            // Select All (header checkbox)
+            // ==========================
+            $("#select").click(function () {
+                $(".selectStudent").prop("checked", $(this).prop("checked"));
+            });
+ 
+            // Sync header checkbox with row checkboxes
+            $(document).on("click", ".selectStudent", function () {
+                let total   = $(".selectStudent").length;
+                let checked = $(".selectStudent:checked").length;
+                $("#select").prop("checked", total > 0 && total === checked);
+            });
+        });
+    </script>
+ 
+</body>
+</html>
+
