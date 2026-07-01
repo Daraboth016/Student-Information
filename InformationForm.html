@@ -255,8 +255,9 @@
                 if(!email) {
                     showError("Please fill in the email address."); return;
                 }
-                if (!/^[A-Za-z]+ [A-Za-z]+$/.test(studentName)) {
-                    showError("Student name must contain only letters and one space."); return;
+                if (!/^[A-Za-z]+(?: [A-Za-z]+)?$/.test(studentName)) {
+                showError("Student name must contain only letters and optionally one space.");
+                return;
                 }
                 if (!/0\d{8,9}$/.test(phone)) {
                     showError("Phone number must start with '0' and be 9 or 10 digits long."); return;
